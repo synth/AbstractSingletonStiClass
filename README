@@ -1,0 +1,26 @@
+#module AbstractSingletonStiClass
+#
+# Copyright 2011 - Peter Philips
+#
+# This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+# 
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+# 
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This module allows you to make parent classes of STI abstract only, and must be derived off of.
+# 
+# requires the 'acts_as_singleton' gem
+#
+# also, checks that there is a corresponding row in the database(if not abstract)
+# a class becomes "abstract" automatically if it is subclassed
+#
+# For the database check to work, there must be at least one validation on the model
+# so the first || create call in acts_as_singleton will fail and return an unsaved object
