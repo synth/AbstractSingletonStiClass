@@ -15,12 +15,61 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# This module allows you to make parent classes of STI abstract only, and must be derived off of.
-# 
-# requires the 'acts_as_singleton' gem
+# Usage: 
+#      class BaseOption < ActiveRecord::Base
+#        acts_as_abstract_singleton_sti
+#        validates_presence_of :name   #IMPORTANT!  see gotcha's below
+#      end
 #
-# also, checks that there is a corresponding row in the database(if not abstract)
-# a class becomes "abstract" automatically if it is subclassed
+#      class CoolOption < BaseOption
+#      end
 #
-# For the database check to work, there must be at least one validation on the model
-# so the first || create call in acts_as_singleton will fail and return an unsaved object
+#      class ParentOption < BaseOption
+#      end
+#      
+#      class SuperCoolOption < ParentOption
+#      end
+#
+#      CoolOption.instance => CoolOption(:id => 1,...)
+#      ParentOption.instance => raises Exception
+#      BaseOption.instance => raises Exception
+#
+# Requirements:
+#      ruby > 1.9.2-p180, rails > 3
+#      gem 'acts_as_singleton'    
+#      http://actsassingleton.rubyforge.org/
+#
+# Description(this is probably confusing - so see the use cases below):
+#
+#   This module allows you to make parent classes of STI'ed classes abstract only, so they must be derived off of.
+#
+#   also, checks that there is a corresponding row in the database(if not abstract)
+#   a class becomes "abstract" automatically if it is subclassed
+#
+#   For the database check to work, there must be at least one validation on the model
+#   so the first || create call in acts_as_singleton will fail and return an unsaved object
+#
+# Use case:
+#
+#    Ok, so this is a whopper of a pattern.  Basically, I needed setup where I have "options".  
+#    Each option has the same basic data structure(eg, name, description, value), however, each option
+#    has very different behavior within the applications workflow.  So enter Single Table Inheritance(STI)
+#
+#    Now, I also, only want ONE instance of each option, essentially, a singleton.  Enter "acts_as_singleton"
+#   
+#    I also want the ability to support child options, and if a class derives off a base class, I want to enforce that the base class has now 
+#    become "abstract"...meaning it can't be instantiated directly, only via subclasses.  Enter "AbstractSingleStiClass"
+#
+# Gotchas:
+#
+#   This will enforce that a database row exists if #instance is called on a non-abstract class.  However, this will
+#   only work if there is at least one validation on the base model that "acts_as_abstract_singleton_sti".  The reason
+#   for this is that "acts_as_singleton" implements #instance with a (first || create), thus creating an instance if it
+#   can't find it.  This is silly, imo.  So adding a validation will cause the #create call to fail and return a new_record, which
+#   is what I check.
+#
+# TODO: 
+#
+#   CoolOption.instance seems to always hit the database, even in rails 3 where I thought there would be some kind of query cache.  
+#   I need to look into why the AR query cache isn't working and/or implement simple caching/cache-busting.
+#
