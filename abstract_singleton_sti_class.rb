@@ -32,7 +32,9 @@ module AbstractSingletonStiClass
         raise "must be called only on subclasses" 
       end
       
-      return instance_without_abstract_check.tap{|o| raise "must have a row in the database before using this class" if o.new_record? }
+      return instance_without_abstract_check.tap{|o| 
+        raise "must have a row in the database before using #{o.class}" if o.new_record? and ( File.basename($0) == "rake" && ARGV.include?("db:migrate") )
+      }
     end
     
     #here is the magic that automagically makes classes "abstract"
