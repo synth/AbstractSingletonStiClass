@@ -23,6 +23,10 @@ module AbstractSingletonStiClass
   
   module ClassMethods
     
+    def running_migration?
+      ( File.basename($0) == "rake" && ARGV.include?("db:migrate") )
+    end
+    
     def abstract?
       @@abstract_classes.include?(self)
     end
@@ -33,7 +37,7 @@ module AbstractSingletonStiClass
       end
       
       return instance_without_abstract_check.tap{|o| 
-        raise "must have a row in the database before using #{o.class}" if o.new_record? and ( File.basename($0) == "rake" && ARGV.include?("db:migrate") )
+        raise "must have a row in the database before using #{o.class}" if !running_migration? and o.new_record?
       }
     end
     
