@@ -46,6 +46,7 @@ module AbstractSingletonStiClass
     def inherited(child)
       @@abstract_classes ||= []
       @@abstract_classes << self unless @@abstract_classes.include?(self)
+      super(child)
     end
     
     def self.extended(base)
